@@ -1,0 +1,60 @@
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+
+public class CalendarTest {
+
+    public static void main(String[] args) {
+
+        String monthNumber = "6";   // June
+        String date = "15";
+        String year = "2027";
+
+        // expectedList'in sırası, input sırasına göre olmalı
+        String[] expectedList = {monthNumber, date, year};
+
+        // Gerekirse kendi path'ine göre setProperty ekle:
+        // System.setProperty("webdriver.chrome.driver", "C://chromedriver.exe");
+
+        WebDriver driver = new ChromeDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+        driver.get("https://rahulshettyacademy.com/seleniumPractise/#/offers");
+
+        // Tarih inputuna tıkla
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".react-date-picker__inputGroup"))).click();
+
+        // Yıl seçim ekranına geç
+        driver.findElement(By.cssSelector(".react-calendar__navigation__label")).click();
+        driver.findElement(By.cssSelector(".react-calendar__navigation__label")).click();
+
+        // Yılı seç
+        driver.findElement(By.xpath("//button[text()='" + year + "']")).click();
+
+        // Ayı seç (0-based index)
+        driver.findElements(By.cssSelector(".react-calendar__year-view__months__month"))
+              .get(Integer.parseInt(monthNumber) - 1)
+              .click();
+
+        // Günü seç
+        driver.findElement(By.xpath("//abbr[text()='" + date + "']")).click();
+
+        // Input'taki 3 alanı al (muhtemelen month/day/year)
+        List<WebElement> actualList = driver.findElements(By.cssSelector(".react-date-picker__inputGroup__input"));
+
+        for (int i = 0; i < actualList.size(); i++) {
+            String value = actualList.get(i).getAttribute("value");
+            System.out.println("Index " + i + " -> " + value);
+            Assert.assertEquals(value, expectedList[i], "Date part mismatch at index " + i);
+        }
+
+        driver.quit();
+    }
+}
