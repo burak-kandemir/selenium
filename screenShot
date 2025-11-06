@@ -1,0 +1,56 @@
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WindowType;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class NewWindow {
+
+    public static void main(String[] args) {
+
+        System.setProperty("webdriver.chrome.driver", "C://chromedriver.exe");
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Parent pencere
+            driver.get("https://rahulshettyacademy.com/angularpractice/");
+            String parentWindowId = driver.getWindowHandle();
+
+            // Yeni pencere aç ve ona geç
+            WebDriver newWindow = driver.switchTo().newWindow(WindowType.WINDOW);
+            newWindow.get("https://rahulshettyacademy.com/");
+
+            // Kurs adını al
+            String courseName = newWindow.findElements(
+                    By.cssSelector("a[href*='https://courses.rahulshettyacademy.com/p']")
+            ).get(1).getText();
+
+            // Tekrar parent pencereye dön
+            driver.switchTo().window(parentWindowId);
+
+            WebElement name = driver.findElement(By.cssSelector("[name='name']"));
+            name.sendKeys(courseName);
+
+            // Sadece bu elementin ekran görüntüsünü al
+            File elementScreenshot = name.getScreenshotAs(OutputType.FILE);
+
+            // Dosyayı kaydet (örnek path, istersen klasör dinamiği kurabilirsin)
+            FileUtils.copyFile(elementScreenshot, new File("nameField_" + System.currentTimeMillis() + ".png"));
+
+            // Element boyutlarını yazdır
+            System.out.println("Height: " + name.getRect().getDimension().getHeight());
+            System.out.println("Width: " + name.getRect().getDimension().getWidth());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // Her durumda tarayıcıyı kapat
+            driver.quit();
+        }
+    }
+}
