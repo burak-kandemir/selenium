@@ -1,0 +1,62 @@
+package demo;
+
+import java.time.Duration;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class WindowHandles {
+
+    public static void main(String[] args) {
+
+        // Kendi path'ine göre güncelle
+        System.setProperty("webdriver.chrome.driver", "C://chromedriver.exe");
+
+        WebDriver driver = new ChromeDriver();
+
+        // Selenium 4 WebDriverWait
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+        driver.get("https://rahulshettyacademy.com/loginpagePractise/#");
+
+        // Blinking text'e tıkla → yeni pencere/tab açılır
+        driver.findElement(By.cssSelector(".blinkingText")).click();
+
+        // Parent pencere handle'ı
+        String parentId = driver.getWindowHandle();
+
+        // Tüm window handle'ları al
+        Set<String> windowIds = driver.getWindowHandles();
+
+        // Child pencereye geç
+        for (String windowId : windowIds) {
+            if (!windowId.equals(parentId)) {
+                driver.switchTo().window(windowId);
+                break;
+            }
+        }
+
+        // Child pencerede text görünene kadar bekle
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".im-para.red")));
+
+        String fullText = driver.findElement(By.cssSelector(".im-para.red")).getText();
+        System.out.println(fullText);
+
+        // Email'i çek
+        String emailId = fullText.split("at")[1].trim().split(" ")[0];
+        System.out.println("Extracted email: " + emailId);
+
+        // Tekrar parent pencereye dön
+        driver.switchTo().window(parentId);
+
+        // Username alanına email'i yaz
+        driver.findElement(By.id("username")).sendKeys(emailId);
+
+        // İş bittiğinde tarayıcıyı kapat
+        driver.quit();
+    }
+}
