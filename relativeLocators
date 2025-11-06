@@ -1,0 +1,46 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import static org.openqa.selenium.support.locators.RelativeLocator.with;
+
+public class RelativeLoc {
+
+    public static void main(String[] args) {
+
+        // Kendi path'ine göre düzenle veya Selenium 4 driver management kullan
+        // System.setProperty("webdriver.chrome.driver", "C://chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "/Users/rahulshetty/Documents/chromedriver");
+
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            driver.get("https://rahulshettyacademy.com/angularpractice/");
+
+            // 1) Name label'ini, input'un üstünden relative locator ile bul
+            WebElement nameEditBox = driver.findElement(By.cssSelector("[name='name']"));
+            String nameLabelText = driver.findElement(with(By.tagName("label")).above(nameEditBox)).getText();
+            System.out.println("Label above name input: " + nameLabelText);
+
+            // 2) Date of Birth input'unu, label'in altından relative locator ile bul
+            WebElement dobLabel = driver.findElement(By.cssSelector("[for='dateofBirth']"));
+            WebElement dobInput = driver.findElement(with(By.tagName("input")).below(dobLabel));
+            dobInput.click();
+
+            // 3) Ice cream checkbox'ını, label'in solundan relative locator ile bul
+            WebElement iceCreamLabel = driver.findElement(
+                    By.xpath("//label[text()='Check me out if you Love IceCreams!']"));
+            WebElement iceCreamCheckbox = driver.findElement(with(By.tagName("input")).toLeftOf(iceCreamLabel));
+            iceCreamCheckbox.click();
+
+            // 4) Radio button'un sağındaki label'i relative locator ile bul
+            WebElement rdb = driver.findElement(By.id("inlineRadio1"));
+            String radioLabelText = driver.findElement(with(By.tagName("label")).toRightOf(rdb)).getText();
+            System.out.println("Label to the right of radio button: " + radioLabelText);
+
+        } finally {
+            driver.quit();
+        }
+    }
+}
