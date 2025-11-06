@@ -1,0 +1,53 @@
+import java.util.HashMap;
+import java.util.Map;
+
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+public class SSLCheck {
+
+    public static void main(String[] args) {
+        // --- Konfigürasyon: kendi ortamına göre güncelle ---
+        // Windows örneği: System.setProperty("webdriver.chrome.driver", "C:\\drivers\\chromedriver.exe");
+        // macOS/Linux örneği: System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+        // Eğer chromedriver PATH'e eklendiyse bu satır gerekmez.
+        System.setProperty("webdriver.chrome.driver", "C://chromedriver.exe");
+
+        ChromeOptions options = new ChromeOptions();
+
+        // 1) Proxy ayarı
+        Proxy proxy = new Proxy();
+        proxy.setHttpProxy("ipaddress:4444"); // ip:port şeklinde
+        proxy.setSslProxy("ipaddress:4444");  // SSL trafiği de proxylensin istersen
+        options.setProxy(proxy); // daha temiz kullanım
+
+        // 2) Download prefs (mutlak path kullan)
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("download.default_directory", "C:\\my\\download\\folder"); // Windows örneği
+        // prefs.put("download.prompt_for_download", false);
+        options.setExperimentalOption("prefs", prefs);
+
+        // 3) SSL hatalarını kabul et
+        options.setAcceptInsecureCerts(true);
+
+        WebDriver driver = null;
+        try {
+            driver = new ChromeDriver(options);
+
+            // Hedef site (expired SSL sertifikalı)
+            driver.get("https://expired.badssl.com/");
+
+            System.out.println("Page title: " + driver.getTitle());
+
+            // Burada test logiğini ekleyebilirsin (assert gibi)
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (driver != null) {
+                driver.quit(); // mutlaka kapat
+            }
+        }
+    }
+}
